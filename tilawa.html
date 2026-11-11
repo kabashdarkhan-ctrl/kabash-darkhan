@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c1f1a">
+<title>Tilawa — Құран оқу жаттықтырушысы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c1f1a;--card:#132b24;--card2:#1a372e;--line:#24483c;--text:#eef5f1;--muted:#8fb0a3;--gold:#e0b862;--ok:#5fd39a;--bad:#ff7a7a;--fix:#f0c36b}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;min-height:100dvh;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.app{max-width:560px;margin:0 auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom));min-height:100dvh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:8px 0 16px}
+.logo{font-weight:700;font-size:20px;letter-spacing:.2px}.logo b{color:var(--gold)}
+.grow{flex:1}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
+.chip b{color:var(--gold)}
+.back{width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:18px}
+.view{display:none;flex:1;flex-direction:column}.view.on{display:flex}
+h1{font-size:26px;line-height:1.2;margin:8px 0 6px}h1 em{font-style:normal;color:var(--gold)}
+.sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+.search{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--text);font:inherit;margin-bottom:12px;outline:none}
+.search:focus{border-color:var(--gold)}
+.surahs{display:flex;flex-direction:column;gap:8px}
+.surah{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;width:100%}
+.surah:active{background:var(--card2)}
+.num{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:10px;background:var(--card2);color:var(--gold);font-weight:600;font-size:13px}
+.surah .t{flex:1;min-width:0}.surah .t b{display:block;font-size:15px}.surah .t small{color:var(--muted);font-size:12px}
+.surah .ar{font-family:"Amiri Quran",serif;font-size:20px}
+.bar{height:4px;background:var(--card2);border-radius:4px;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+.note{font-size:12px;color:var(--muted);background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.note.warn{color:var(--fix);border-color:#6b5a2c}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tog{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;color:var(--muted)}
+.tog.on{background:var(--gold);color:#1b1505;border-color:var(--gold);font-weight:600}
+.ayahcard{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 18px;flex:1;display:flex;flex-direction:column;min-height:260px}
+.ayahmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-bottom:14px}
+.words{direction:rtl;font-family:"Amiri Quran","Amiri",serif;font-size:30px;line-height:2.1;display:flex;flex-wrap:wrap;gap:4px 10px;align-content:center;flex:1}
+.w{border-radius:8px;padding:0 4px;transition:.2s;color:#6f8f83}
+.w.ok{color:var(--ok)}.w.fix{color:var(--fix)}.w.err{color:var(--bad);background:rgba(255,122,122,.12)}
+.w.cur{box-shadow:0 2px 0 var(--gold)}
+.hide .w:not(.ok):not(.fix):not(.err){color:transparent;background:var(--card2);user-select:none}
+.heard{min-height:22px;direction:rtl;color:var(--muted);font-size:14px;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;gap:4px;flex-wrap:wrap;margin:14px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--card2);border:1px solid var(--line)}
+.dot.done{background:var(--ok);border-color:var(--ok)}.dot.mid{background:var(--fix);border-color:var(--fix)}.dot.now{border-color:var(--gold);box-shadow:0 0 0 2px rgba(224,184,98,.3)}
+.controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px}
+.side{width:52px;height:52px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:20px}
+.side:disabled{opacity:.35}
+.mic{width:84px;height:84px;border-radius:50%;background:var(--gold);color:#1b1505;font-size:32px;display:grid;place-items:center;box-shadow:0 8px 30px rgba(224,184,98,.25)}
+.mic.live{background:var(--bad);color:#fff;animation:pulse 1.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,122,122,.5)}100%{box-shadow:0 0 0 22px rgba(255,122,122,0)}}
+.hint{text-align:center;color:var(--muted);font-size:13px;margin-top:12px;min-height:18px}
+.result{text-align:center;margin:auto 0;padding:24px 0}
+.ring{width:150px;height:150px;border-radius:50%;margin:0 auto 18px;display:grid;place-items:center;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--card2) 0)}
+.ring span{width:122px;height:122px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:34px;font-weight:700}
+.btn{display:block;width:100%;padding:14px;border-radius:14px;background:var(--gold);color:#1b1505;font-weight:600;margin-top:10px}
+.btn.ghost{background:var(--card);color:var(--text);border:1px solid var(--line)}
+@media (prefers-reduced-motion:reduce){.mic.live{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <button class="back" id="back" hidden aria-label="Артқа">‹</button>
+    <div class="logo">Tila<b>wa</b></div>
+    <div class="grow"></div>
+    <div class="chip">🔥 <b id="streak">0</b> күн</div>
+    <div class="chip">✓ <b id="total">0</b> аят</div>
+  </header>
+
+  <section class="view on" id="home">
+    <h1>Құранды <em>қатесіз</em> оқуды жаттық</h1>
+    <p class="sub">Сүрені таңдап, микрофонға оқыңыз. Әр сөз тыңдалып, дұрыс не қате оқылғаны бірден көрсетіледі.</p>
+    <div class="note warn" id="noSpeech" hidden>Бұл браузер дауысты тануды қолдамайды. Chrome, Edge немесе Safari арқылы ашыңыз.</div>
+    <div class="note" id="offline" hidden>Толық сүрелер тізімі жүктелмеді — әзірге 4 қысқа сүре қолжетімді.</div>
+    <input class="search" id="search" placeholder="Сүрені іздеу (атауы не нөмірі)" autocomplete="off">
+    <div class="surahs" id="surahs"></div>
+  </section>
+
+  <section class="view" id="practice">
+    <div class="toolbar">
+      <button class="tog" id="hideTog">🙈 Жатқа айту</button>
+      <button class="tog" id="listenBtn">🔊 Тыңдау</button>
+      <button class="tog" id="revealBtn">👁 Көрсету</button>
+    </div>
+    <div class="ayahcard">
+      <div class="ayahmeta"><span id="surahTitle"></span><span id="ayahNo"></span></div>
+      <div class="words" id="words"></div>
+      <div class="heard" id="heard"></div>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="controls">
+      <button class="side" id="prev" aria-label="Алдыңғы аят">›</button>
+      <button class="mic" id="mic" aria-label="Жазуды бастау">🎙</button>
+      <button class="side" id="next" aria-label="Келесі аят">‹</button>
+    </div>
+    <p class="hint" id="hint">Микрофонды басып, аятты оқыңыз</p>
+  </section>
+
+  <section class="view" id="done">
+    <div class="result">
+      <div class="ring" id="ring" style="--p:0"><span id="pct">0%</span></div>
+      <h1 id="doneTitle">Сүре аяқталды</h1>
+      <p class="sub" id="doneSub"></p>
+      <button class="btn" id="again">Қайта оқу</button>
+      <button class="btn ghost" id="toHome">Басқа сүре таңдау</button>
+    </div>
+  </section>
+</div>
+<audio id="audio" preload="none"></audio>
+
+<script>
+const $=s=>document.querySelector(s);
+const API='https://api.alquran.cloud/v1';
+const AUDIO=n=>`https://cdn.islamic.network/quran/audio/128/ar.alafasy/${n}.mp3`;
+const BISM='بسم الله الرحمن الرحيم';
+// Офлайн қор: желі болмаса да жұмыс істейтін қысқа сүрелер
+const LOCAL={
+ 1:{name:'Әл-Фатиха',ar:'الفاتحة',first:1,ayahs:['بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ','الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ','الرَّحْمَٰنِ الرَّحِيمِ','مَالِكِ يَوْمِ الدِّينِ','إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ','اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ','صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ']},
+ 112:{name:'Әл-Ықылас',ar:'الإخلاص',first:6222,ayahs:['قُلْ هُوَ اللَّهُ أَحَدٌ','اللَّهُ الصَّمَدُ','لَمْ يَلِدْ وَلَمْ يُولَدْ','وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ']},
+ 113:{name:'Әл-Фалақ',ar:'الفلق',first:6226,ayahs:['قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ','مِنْ شَرِّ مَا خَلَقَ','وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ','وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ','وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ']},
+ 114:{name:'Ән-Нас',ar:'الناس',first:6231,ayahs:['قُلْ أَعُوذُ بِرَبِّ النَّاسِ','مَلِكِ النَّاسِ','إِلَٰهِ النَّاسِ','مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ','الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ','مِنَ الْجِنَّةِ وَالنَّاسِ']}
+};
+let surahList=Object.entries(LOCAL).map(([n,s])=>({n:+n,name:s.name,ar:s.ar,count:s.ayahs.length}));
+const store={get:(k,d)=>{try{return JSON.parse(localStorage.getItem('tilawa:'+k))??d}catch{return d}},set:(k,v)=>{try{localStorage.setItem('tilawa:'+k,JSON.stringify(v))}catch{}}};
+let progress=store.get('progress',{}); // {surah:{ayahIndex:bestPct}}
+let cur=null, idx=0, states=[], pos=0, firstTry=[], listening=false, hideMode=store.get('hide',false);
+
+// ---------- Мәтінді салыстыру ----------
+function norm(s){return s.replace(/[ً-ٰٟۖ-ۭـ]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/[^ء-ي\s]/g,'').trim()}
+function lev(a,b){if(a===b)return 0;const m=a.length,n=b.length;let p=[...Array(n+1).keys()];for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function same(a,b){if(a===b)return true;const strip=x=>x.replace(/^ال/,'');if(Math.min(a.length,b.length)>=4&&lev(a,b)<=1)return true;return strip(a)===strip(b)&&strip(a).length>=3}
+// Танылған сөздерді күтілген сөздермен туралау
+function align(expected,heard){
+  const st=expected.map(()=>'');const miss=expected.map(()=>false);let i=0;
+  for(const h of heard){
+    if(i>=expected.length)break;
+    if(same(h,expected[i])){st[i]=miss[i]?'fix':'ok';i++}
+    else if(i+1<expected.length&&same(h,expected[i+1])){st[i]='err';miss[i]=true;st[i+1]=miss[i+1]?'fix':'ok';i+=2}
+    else{miss[i]=true;st[i]='err'}
+  }
+  return{st,pos:i};
+}
+
+// ---------- Деректер ----------
+async function loadList(){
+  try{const r=await fetch(API+'/surah');const j=await r.json();
+    surahList=j.data.map(s=>({n:s.number,name:LOCAL[s.number]?.name||s.englishName,ar:s.name.replace(/^سُورَةُ\s*/,''),count:s.numberOfAyahs}));
+  }catch{$('#offline').hidden=false}
+  renderList();
+}
+async function loadSurah(n){
+  const meta=surahList.find(s=>s.n===n);
+  try{const r=await fetch(`${API}/surah/${n}/quran-simple`);const j=await r.json();
+    const ayahs=j.data.ayahs.map((a,i)=>{let t=a.text.replace(/^﻿/,'');
+      if(i===0&&n!==1&&n!==9&&norm(t).startsWith(BISM))t=t.split(/\s+/).slice(4).join(' ');
+      return{text:t,g:a.number}});
+    return{n,name:meta.name,ayahs};
+  }catch(e){const l=LOCAL[n];if(!l)throw e;return{n,name:l.name,ayahs:l.ayahs.map((t,i)=>({text:t,g:l.first+i}))}}
+}
+function surahPct(n,count){const p=progress[n]||{};return Math.round(Object.values(p).filter(v=>v>=80).length/count*100)}
+function renderList(){
+  const q=$('#search').value.trim().toLowerCase();
+  $('#surahs').innerHTML=surahList.filter(s=>!q||String(s.n)===q||s.name.toLowerCase().includes(q)||s.ar.includes(q)).map(s=>{const p=surahPct(s.n,s.count);
+    return`<button class="surah" data-n="${s.n}"><span class="num">${s.n}</span><span class="t"><b>${s.name}</b><small>${s.count} аят${p?` · ${p}% жатталды`:''}</small>${p?`<div class="bar"><i style="width:${p}%"></i></div>`:''}</span><span class="ar">${s.ar}</span></button>`}).join('')||'<p class="sub">Ештеңе табылмады</p>';
+}
+function renderStats(){
+  $('#total').textContent=Object.values(progress).reduce((a,p)=>a+Object.values(p).filter(v=>v>=80).length,0);
+  const s=store.get('streak',{d:'',n:0});const today=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();
+  $('#streak').textContent=(s.d===today||s.d===y)?s.n:0;
+}
+function bumpStreak(){const s=store.get('streak',{d:'',n:0});const today=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();if(s.d===today)return;store.set('streak',{d:today,n:s.d===y?s.n+1:1})}
+
+// ---------- Экрандар ----------
+function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===id));$('#back').hidden=id==='home';if(id!=='practice')stop();if(id==='home'){renderList();renderStats()}}
+async function open(n){
+  $('#hint').textContent='Жүктелуде…';
+  try{cur=await loadSurah(n)}catch{alert('Сүрені жүктеу мүмкін болмады. Интернетті тексеріңіз.');return}
+  firstTry=cur.ayahs.map(()=>null);idx=0;show('practice');renderAyah();
+}
+function expected(){return cur.ayahs[idx].text.split(/\s+/).filter(Boolean)}
+function renderAyah(){
+  const ws=expected();states=ws.map(()=>'');pos=0;
+  $('#surahTitle').textContent=cur.name;$('#ayahNo').textContent=`${idx+1} / ${cur.ayahs.length} аят`;
+  $('#words').innerHTML=ws.map(w=>`<span class="w">${w}</span>`).join('');
+  $('#words').classList.toggle('hide',hideMode);$('#hideTog').classList.toggle('on',hideMode);
+  $('#heard').textContent='';$('#prev').disabled=idx===0;$('#next').disabled=idx===cur.ayahs.length-1;
+  $('#dots').innerHTML=cur.ayahs.map((_,i)=>{const b=(progress[cur.n]||{})[i];return`<i class="dot ${b>=80?'done':b!=null?'mid':''} ${i===idx?'now':''}"></i>`}).join('');
+  paint();
+  $('#hint').textContent=listening?'Тыңдап тұрмын…':'Микрофонды басып, аятты оқыңыз';
+}
+function paint(){document.querySelectorAll('#words .w').forEach((el,i)=>{el.className='w '+(states[i]||'')+(i===pos&&listening?' cur':'')})}
+
+// ---------- Дауысты тану ----------
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null;
+if(!SR)$('#noSpeech').hidden=false;
+function start(){
+  if(!SR){$('#hint').textContent='Бұл браузерде дауысты тану жоқ';return}
+  $('#audio').pause();
+  rec=new SR();rec.lang='ar-SA';rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
+  rec.onresult=e=>{let t='';for(const r of e.results)t+=r[0].transcript+' ';onHeard(t)};
+  rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){listening=false;setMic();$('#hint').textContent='Микрофонға рұқсат беріңіз'}};
+  rec.onend=()=>{if(listening)setTimeout(()=>{if(listening)start()},150)};
+  try{rec.start();listening=true;setMic();$('#hint').textContent='Тыңдап тұрмын…';paint()}catch{}
+}
+function stop(){listening=false;if(rec){rec.onend=null;try{rec.stop()}catch{}rec=null}setMic()}
+function setMic(){$('#mic').classList.toggle('live',listening);$('#mic').textContent=listening?'■':'🎙'}
+function onHeard(text){
+  $('#heard').textContent=text.trim();
+  const exp=expected().map(norm),heard=norm(text).split(/\s+/).filter(Boolean);
+  const r=align(exp,heard);states=r.st;pos=r.pos;paint();
+  if(pos>=exp.length)finishAyah();
+}
+function finishAyah(){
+  const ok=states.filter(s=>s==='ok').length,pct=Math.round(ok/states.length*100);
+  if(firstTry[idx]==null)firstTry[idx]=pct;
+  (progress[cur.n]??={})[idx]=Math.max(progress[cur.n][idx]??0,pct);store.set('progress',progress);bumpStreak();renderStats();
+  // Тану сессиясын жаңарту — келесі аят таза мәтіннен басталады
+  if(rec){rec.onend=null;try{rec.abort()}catch{}rec=null}
+  $('#hint').textContent=pct===100?'Мәшаллаһ! Қатесіз ✓':`Дәлдік: ${pct}%`;
+  setTimeout(()=>{
+    if(!cur)return;
+    if(idx<cur.ayahs.length-1){idx++;renderAyah();if(listening)start()}
+    else{stop();finishSurah()}
+  },900);
+}
+function finishSurah(){
+  const done=firstTry.filter(v=>v!=null);const avg=done.length?Math.round(done.reduce((a,b)=>a+b,0)/done.length):0;
+  $('#ring').style.setProperty('--p',avg);$('#pct').textContent=avg+'%';
+  $('#doneTitle').textContent=`«${cur.name}» аяқталды`;
+  $('#doneSub').textContent=avg===100?'Барлық аят қатесіз оқылды. Мәшаллаһ!':avg>=80?'Өте жақсы! Сарымен белгіленген аяттарды қайталаңыз.':'Жаттығуды жалғастырыңыз — қайталаған сайын жеңілдейді.';
+  show('done');
+}
+
+// ---------- Оқиғалар ----------
+$('#surahs').onclick=e=>{const b=e.target.closest('.surah');if(b)open(+b.dataset.n)};
+$('#search').oninput=renderList;
+$('#back').onclick=()=>show('home');$('#toHome').onclick=()=>show('home');
+$('#again').onclick=()=>open(cur.n);
+$('#mic').onclick=()=>listening?stop():start();
+$('#prev').onclick=()=>{if(idx>0){idx--;restart()}};
+$('#next').onclick=()=>{if(idx<cur.ayahs.length-1){idx++;restart()}};
+function restart(){const was=listening;stop();renderAyah();if(was)start()}
+$('#hideTog').onclick=()=>{hideMode=!hideMode;store.set('hide',hideMode);$('#words').classList.toggle('hide',hideMode);$('#hideTog').classList.toggle('on',hideMode)};
+$('#revealBtn').onclick=()=>{$('#words').classList.remove('hide');setTimeout(()=>$('#words').classList.toggle('hide',hideMode),2500)};
+$('#listenBtn').onclick=()=>{stop();const a=$('#audio');a.src=AUDIO(cur.ayahs[idx].g);a.play().catch(()=>{$('#hint').textContent='Аудионы ойнату мүмкін болмады'})};
+renderList();renderStats();loadList();
+</script>
+</body>
+</html>
